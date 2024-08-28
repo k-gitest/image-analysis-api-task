@@ -46,9 +46,12 @@ class ImageAnalysisService
     private function callAnalysisApi(string $imagePath): array
     {
         try{
-            $response = Http::post($this->baseUrl, [
+            $response = Http::timeout(30) 
+            ->retry(3, 100)
+            ->post($this->baseUrl, [
                 'image_path' => $imagePath
-            ])->throw();
+            ])
+            ->throw();
 
             if (!$response['success']) {
                 Log::error('API Error: ' . $response['message'], ['image_path' => $imagePath]);
